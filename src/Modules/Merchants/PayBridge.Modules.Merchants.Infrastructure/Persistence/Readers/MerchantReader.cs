@@ -111,7 +111,7 @@ namespace PayBridge.Modules.Merchants.Infrastructure.Persistence.Readers
                 result.MerchantId,
                 result.MerchantCode,
                 result.MerchantDisplayName,
-                result.MerchantStatus.ToString(),
+                (MerchantStatusCode)(int)result.MerchantStatus,
                 result.SectorId,
                 result.SectorCode,
                 result.SectorName,

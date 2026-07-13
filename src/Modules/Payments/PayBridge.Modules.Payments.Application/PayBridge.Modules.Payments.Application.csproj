@@ -13,6 +13,8 @@
     <ProjectReference Include="..\PayBridge.Modules.Payments.Contracts\PayBridge.Modules.Payments.Contracts.csproj" />
     <ProjectReference Include="..\PayBridge.Modules.Payments.Domain\PayBridge.Modules.Payments.Domain.csproj" />
     <ProjectReference Include="..\..\..\BuildingBlocks\PayBridge.BuildingBlocks.Persistence\PayBridge.BuildingBlocks.Persistence.csproj" />
+    <ProjectReference Include="..\..\..\BuildingBlocks\PayBridge.BuildingBlocks.Security\PayBridge.BuildingBlocks.Security.csproj" />
+    <ProjectReference Include="..\..\Merchants\PayBridge.Modules.Merchants.Contracts\PayBridge.Modules.Merchants.Contracts.csproj" />
   </ItemGroup>
 
   <ItemGroup>

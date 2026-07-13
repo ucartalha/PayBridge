@@ -4,7 +4,7 @@ public sealed record MerchantPaymentAccessInfo(
     Guid MerchantId,
     string MerchantCode,
     string MerchantDisplayName,
-    string MerchantStatus,
+    MerchantStatusCode MerchantStatus,
     Guid SectorId,
     string SectorCode,
     string SectorName,

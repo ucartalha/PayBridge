@@ -10,9 +10,8 @@ public static class DependencyInjection
         this IServiceCollection services)
     {
         services.AddScoped<IPaymentOrchestrator, PaymentOrchestrator>();
-        services.AddScoped<
-           IProviderPaymentResultResolver,
-           ProviderPaymentResultResolver>();
+        services.AddScoped<IProviderPaymentResultResolver,ProviderPaymentResultResolver>();
+        services.AddScoped<IPaymentActorResolver,PaymentActorResolver>();
         return services;
     }
 }

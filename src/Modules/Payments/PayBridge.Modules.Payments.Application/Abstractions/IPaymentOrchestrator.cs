@@ -10,6 +10,8 @@ namespace PayBridge.Modules.Payments.Application.Abstractions
 {
     public interface IPaymentOrchestrator
     {
-        Task<PaymentExecutionResult> ExecutePaymentAsync(CreatePaymentCommand command, CancellationToken cancellationToken = default);
+        Task<PaymentExecutionResult> ExecutePaymentAsync(
+        PaymentExecutionRequest request,
+        CancellationToken cancellationToken = default);
     }
 }

@@ -4,98 +4,99 @@ using PayBridge.Modules.Payments.Application.Payments.CompletePayment;
 using PayBridge.Modules.Payments.Application.Payments.CreatePayment;
 using PayBridge.Modules.Providers.Contracts;
 
-namespace PayBridge.Modules.Payments.Application.Payments.PaymentsExecution;
+namespace PayBridge.Modules.Payments.Application
+    .Payments.PaymentsExecution;
 
-public sealed class PaymentOrchestrator : IPaymentOrchestrator
+public sealed class PaymentOrchestrator
+    : IPaymentOrchestrator
 {
     private readonly ISender _sender;
     private readonly IPaymentProviderFactory _providerFactory;
-    private readonly IProviderPaymentResultResolver _providerResultResolver;
+    private readonly IProviderPaymentResultResolver
+        _providerResultResolver;
+    private readonly IPaymentActorResolver
+        _paymentActorResolver;
+    private readonly IProviderCredentialResolver
+        _providerCredentialResolver;
 
     public PaymentOrchestrator(
         ISender sender,
         IPaymentProviderFactory providerFactory,
-        IProviderPaymentResultResolver providerResultResolver)
+        IProviderPaymentResultResolver providerResultResolver,
+        IPaymentActorResolver paymentActorResolver,
+        IProviderCredentialResolver providerCredentialResolver)
     {
         _sender = sender;
         _providerFactory = providerFactory;
         _providerResultResolver = providerResultResolver;
+        _paymentActorResolver = paymentActorResolver;
+        _providerCredentialResolver =
+            providerCredentialResolver;
     }
 
-    public async Task<PaymentExecutionResult> ExecutePaymentAsync(
-        CreatePaymentCommand command,
-        CancellationToken cancellationToken = default)
+    public async Task<PaymentExecutionResult>
+        ExecutePaymentAsync(
+            PaymentExecutionRequest request,
+            CancellationToken cancellationToken = default)
     {
-        var pendingResult = await CreatePendingPaymentAsync(
-            command,
+        var actor = await _paymentActorResolver.ResolveAsync(
+            request,
             cancellationToken);
 
-        var provider = _providerFactory.Resolve(command.ProviderCode);
+        var provider = _providerFactory.Resolve(
+            request.ProviderCode);
 
-        var providerResult = await ResolveProviderResultAsync(
-            provider,
-            pendingResult.PaymentId,
-            command,
+        var credential =
+            await _providerCredentialResolver.ResolveAsync(
+                actor.MerchantId,
+                request.ProviderCode,
+                actor.Channel,
+                cancellationToken);
+
+        var createCommand = new CreatePaymentCommand(
+            MerchantId: actor.MerchantId,
+            OrderId: request.OrderId,
+            Amount: request.Amount,
+            Currency: request.Currency,
+            ProviderCode: request.ProviderCode);
+
+        var pendingResult = await _sender.Send(
+            createCommand,
             cancellationToken);
 
-        var completeResult = await CompletePaymentAsync(
-            pendingResult.PaymentId,
-            providerResult);
+        var chargeRequest = new ProviderChargeRequest(
+            PaymentId: pendingResult.PaymentId,
+            OrderId: request.OrderId,
+            Amount: request.Amount,
+            Currency: request.Currency,
+            IdempotencyKey:
+                pendingResult.PaymentId.ToString("N"),
+            Credential: credential);
 
-        return ToExecutionResult(completeResult);
-    }
+        var providerResult =
+            await _providerResultResolver.ResolveAsync(
+                provider,
+                chargeRequest,
+                cancellationToken);
 
-    private async Task<CreatePaymentResult> CreatePendingPaymentAsync(
-        CreatePaymentCommand command,
-        CancellationToken cancellationToken)
-    {
-        return await _sender.Send(
-            command,
-            cancellationToken);
-    }
+        var completeCommand =
+            new CompletePaymentCommand(
+                PaymentId: pendingResult.PaymentId,
+                ProviderState: providerResult.State,
+                ProviderTransactionId:
+                    providerResult.ProviderTransactionId,
+                ErrorCode: providerResult.ErrorCode,
+                ErrorMessage: providerResult.ErrorMessage);
 
-    private async Task<ProviderFinalResult> ResolveProviderResultAsync(
-        IPaymentProvider provider,
-        Guid paymentId,
-        CreatePaymentCommand command,
-        CancellationToken cancellationToken)
-    {
-        var providerRequest = new ProviderChargeRequest(
-            PaymentId: paymentId,
-            OrderId: command.OrderId,
-            Amount: command.Amount,
-            Currency: command.Currency,
-            IdempotencyKey: paymentId.ToString("N"));
-
-        return await _providerResultResolver.ResolveAsync(
-            provider,
-            providerRequest,
-            cancellationToken);
-    }
-
-    private async Task<CompletePaymentResult> CompletePaymentAsync(
-        Guid paymentId,
-        ProviderFinalResult providerResult)
-    {
-        var completeCommand = new CompletePaymentCommand(
-            PaymentId: paymentId,
-            ProviderState: providerResult.State,
-            ProviderTransactionId: providerResult.ProviderTransactionId,
-            ErrorCode: providerResult.ErrorCode,
-            ErrorMessage: providerResult.ErrorMessage);
-
-        return await _sender.Send(
+        var completeResult = await _sender.Send(
             completeCommand,
             CancellationToken.None);
-    }
 
-    private static PaymentExecutionResult ToExecutionResult(
-        CompletePaymentResult completeResult)
-    {
         return new PaymentExecutionResult(
             PaymentId: completeResult.PaymentId,
             Status: completeResult.Status,
-            ProviderTransactionId: completeResult.ProviderTransactionId,
+            ProviderTransactionId:
+                completeResult.ProviderTransactionId,
             ErrorCode: completeResult.ErrorCode,
             ErrorMessage: completeResult.ErrorMessage);
     }

@@ -4,7 +4,7 @@ namespace PayBridge.Modules.Providers.Infrastructure.Mock;
 
 public sealed class MockPaymentProvider : IPaymentProvider
 {
-    public string ProviderCode => "MockBank";
+    public string ProviderCode => "Mock";
 
     public Task<ProviderChargeResponse> ChargeAsync(
         ProviderChargeRequest request,

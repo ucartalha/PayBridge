@@ -330,6 +330,18 @@
     "userMessage": "Ödeme tutarı bu kanal için belirlenen limiti aşmaktadır."
   },
   {
+    "code": 200047,
+    "key": "merchants.payment_channel_required",
+    "message": "Payment channel is required.",
+    "userMessage": "Ödeme kanalı zorunludur."
+  },
+  {
+    "code": 200048,
+    "key": "merchants.payment_channel_not_supported",
+    "message": "Payment channel is not supported.",
+    "userMessage": "Ödeme kanalı desteklenmiyor."
+  },
+  {
     "code": 200050,
     "key": "merchants.provider_code_required",
     "message": "Provider code is required.",

@@ -29,6 +29,8 @@ public enum MerchantErrorCode
     InvalidChannelDailyLimit = 200044,
     ChannelAmountBelowMinimum = 200045,
     ChannelAmountLimitExceeded = 200046,
+    PaymentChannelRequired = 200047,
+    PaymentChannelNotSupported = 200048,
 
     ProviderCodeRequired = 200050,
     ProviderAccountNotFound = 200051,

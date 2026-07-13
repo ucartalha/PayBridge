@@ -71,18 +71,29 @@ public static class DependencyInjection
                 {
                     OnTokenValidated = async context =>
                     {
-                        var jti = context.Principal?
+                        var principal = context.Principal;
+
+                        var jti = principal?
                             .FindFirst(JwtRegisteredClaimNames.Jti)?
                             .Value;
 
-                        var clientCode = context.Principal?
+                        var clientCode = principal?
                             .FindFirst(IntegrationAuthClaimNames.ClientCode)?
                             .Value;
 
+                        var integrationClientIdValue = principal?
+                            .FindFirst(IntegrationAuthClaimNames.IntegrationClientId)?
+                            .Value;
+
                         if (string.IsNullOrWhiteSpace(jti) ||
-                            string.IsNullOrWhiteSpace(clientCode))
+                            string.IsNullOrWhiteSpace(clientCode) ||
+                            !Guid.TryParse(
+                                integrationClientIdValue,
+                                out _))
                         {
-                            context.Fail("Required integration token claims are missing.");
+                            context.Fail(
+                                "Required integration token claims are missing or invalid.");
+
                             return;
                         }
 
@@ -101,7 +112,22 @@ public static class DependencyInjection
                 };
             });
 
-        services.AddAuthorization();
+        services.AddAuthorization(options =>
+        {
+            options.AddPolicy(
+                IntegrationAuthorizationPolicies.PaymentsCreate,
+                policy =>
+                {
+                    policy.AddAuthenticationSchemes(
+                        IntegrationJwtDefaults.Scheme);
+
+                    policy.RequireAuthenticatedUser();
+
+                    policy.RequireClaim(
+                        IntegrationAuthClaimNames.Scope,
+                        IntegrationAuthorizationPolicies.PaymentsCreate);
+                });
+        });
 
         return services;
     }
