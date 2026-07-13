@@ -1,0 +1,386 @@
+[
+  {
+    "code": 100001,
+    "key": "payments.merchant_id_required",
+    "message": "MerchantId is required while creating payment.",
+    "userMessage": "Üye işyeri bilgisi zorunludur."
+  },
+  {
+    "code": 100002,
+    "key": "payments.order_id_required",
+    "message": "OrderId is required while creating payment.",
+    "userMessage": "Sipariş numarası zorunludur."
+  },
+  {
+    "code": 100003,
+    "key": "payments.amount_must_be_greater_than_zero",
+    "message": "Payment amount must be greater than zero.",
+    "userMessage": "Ödeme tutarı sıfırdan büyük olmalıdır."
+  },
+  {
+    "code": 100004,
+    "key": "payments.currency_required",
+    "message": "Currency is required while creating payment.",
+    "userMessage": "Para birimi zorunludur."
+  },
+  {
+    "code": 100005,
+    "key": "payments.provider_code_required",
+    "message": "ProviderCode is required while creating payment.",
+    "userMessage": "Ödeme sağlayıcı bilgisi zorunludur."
+  },
+  {
+    "code": 100010,
+    "key": "payments.only_pending_payment_can_be_marked_as_processing",
+    "message": "Only pending payments can be marked as processing.",
+    "userMessage": "Yalnızca bekleyen ödemeler işleniyor durumuna alınabilir."
+  },
+  {
+    "code": 100011,
+    "key": "payments.only_pending_or_processing_payment_can_be_marked_as_succeeded",
+    "message": "Only pending or processing payments can be marked as succeeded.",
+    "userMessage": "Yalnızca bekleyen veya işlenen ödemeler başarılı durumuna alınabilir."
+  },
+  {
+    "code": 100012,
+    "key": "payments.provider_transaction_id_required",
+    "message": "Provider transaction id is required.",
+    "userMessage": "Sağlayıcı işlem numarası zorunludur."
+  },
+  {
+    "code": 100020,
+    "key": "payments.succeeded_payment_cannot_be_marked_as_failed",
+    "message": "Succeeded payment cannot be marked as failed.",
+    "userMessage": "Başarılı olmuş ödeme başarısız durumuna alınamaz."
+  },
+  {
+    "code": 100021,
+    "key": "payments.refunded_payment_cannot_be_marked_as_failed",
+    "message": "Refunded or partially refunded payment cannot be marked as failed.",
+    "userMessage": "İadesi yapılmış ödeme başarısız durumuna alınamaz."
+  },
+  {
+    "code": 100022,
+    "key": "payments.only_pending_or_processing_payment_can_be_marked_as_failed",
+    "message": "Only pending or processing payments can be marked as failed.",
+    "userMessage": "Yalnızca bekleyen veya işlenen ödemeler başarısız durumuna alınabilir."
+  },
+  {
+    "code": 100030,
+    "key": "payments.only_succeeded_payment_can_be_voided",
+    "message": "Only succeeded payments can be voided.",
+    "userMessage": "Yalnızca başarılı ödemeler iptal edilebilir."
+  },
+  {
+    "code": 100031,
+    "key": "payments.refunded_payment_cannot_be_voided",
+    "message": "Refunded payment cannot be voided.",
+    "userMessage": "İade edilmiş ödeme iptal edilemez."
+  },
+  {
+    "code": 100040,
+    "key": "payments.only_succeeded_or_partially_refunded_payment_can_be_refunded",
+    "message": "Only succeeded or partially refunded payments can be refunded.",
+    "userMessage": "Yalnızca başarılı veya kısmi iade edilmiş ödemeler için iade yapılabilir."
+  },
+  {
+    "code": 100041,
+    "key": "payments.refund_amount_must_be_greater_than_zero",
+    "message": "Refund amount must be greater than zero.",
+    "userMessage": "İade tutarı sıfırdan büyük olmalıdır."
+  },
+  {
+    "code": 100042,
+    "key": "payments.refund_amount_exceeds_refundable_amount",
+    "message": "Refund amount exceeds refundable amount.",
+    "userMessage": "İade tutarı, iade edilebilir tutardan büyük olamaz."
+  },
+  {
+    "code": 100050,
+    "key": "payments.only_pending_or_processing_payment_can_be_expired",
+    "message": "Only pending or processing payments can be expired.",
+    "userMessage": "Yalnızca bekleyen veya işlenen ödemeler süresi doldu durumuna alınabilir."
+  },
+  {
+    "code": 100051,
+    "key": "payments.not_found",
+    "message": "Payment not found.",
+    "userMessage": "Geçerli ödeme bulunamadı."
+  },
+  {
+    "code": 110001,
+    "key": "payment_transactions.payment_id_required",
+    "message": "PaymentId is required while creating payment transaction.",
+    "userMessage": "Ödeme işlem kaydı için ödeme bilgisi zorunludur."
+  },
+  {
+    "code": 110002,
+    "key": "payment_transactions.amount_must_be_greater_than_zero",
+    "message": "Payment transaction amount must be greater than zero.",
+    "userMessage": "Ödeme işlem tutarı sıfırdan büyük olmalıdır."
+  },
+  {
+    "code": 110003,
+    "key": "payment_transactions.provider_code_required",
+    "message": "ProviderCode is required while creating payment transaction.",
+    "userMessage": "Ödeme işlem kaydı için sağlayıcı bilgisi zorunludur."
+  },
+  {
+    "code": 110004,
+    "key": "payment_transactions.error_code_required",
+    "message": "ErrorCode is required for failed payment transaction.",
+    "userMessage": "Başarısız ödeme işlemi için hata kodu zorunludur."
+  },
+  {
+    "code": 110005,
+    "key": "payment_transactions.error_message_required",
+    "message": "ErrorMessage is required for failed payment transaction.",
+    "userMessage": "Başarısız ödeme işlemi için hata mesajı zorunludur."
+  },
+  {
+    "code": 110006,
+    "key": "payment_transactions.provider_transaction_id_required",
+    "message": "ProviderTransactionId is required for successful payment transaction.",
+    "userMessage": "Başarılı ödeme işlemi için sağlayıcı işlem numarası zorunludur."
+  },
+  {
+    "code": 110007,
+    "key": "payment_transactions.failed_transaction_cannot_be_marked_as_succeeded",
+    "message": "Failed payment transaction cannot be marked as succeeded.",
+    "userMessage": "Başarısız olmuş ödeme işlem kaydı başarılı durumuna alınamaz."
+  },
+  {
+    "code": 110008,
+    "key": "payment_transactions.succeeded_transaction_cannot_be_marked_as_failed",
+    "message": "Succeeded payment transaction cannot be marked as failed.",
+    "userMessage": "Başarılı olmuş ödeme işlem kaydı başarısız durumuna alınamaz."
+  },
+  {
+    "code": 120001,
+    "key": "providers.provider_not_supported",
+    "message": "Payment provider is not supported.",
+    "userMessage": "Geçersiz veya desteklenmeyen ödeme sağlayıcı bilgisi gönderildi."
+  },
+  {
+    "code": 130001,
+    "key": "integration_auth.invalid_client",
+    "message": "Integration client credentials are invalid.",
+    "userMessage": "Entegrasyon bilgileri geçersiz."
+  },
+  {
+    "code": 130002,
+    "key": "integration_auth.invalid_token",
+    "message": "Integration token is invalid or required claims are missing.",
+    "userMessage": "Entegrasyon token bilgisi geçersiz."
+  },
+  {
+    "code": 130003,
+    "key": "integration_auth.insufficient_scope",
+    "message": "Integration token does not have required scope.",
+    "userMessage": "Bu işlem için entegrasyon yetkisi bulunmamaktadır."
+  },
+  {
+    "code": 130004,
+    "key": "integration_auth.merchant_id_required",
+    "message": "MerchantId is required for integration authorized payment request.",
+    "userMessage": "Ödeme isteği için üye işyeri bilgisi zorunludur."
+  },
+  {
+    "code": 130005,
+    "key": "integration_auth.payment_target_not_allowed",
+    "message": "Integration client is not allowed to create payment for the target merchant.",
+    "userMessage": "Bu entegrasyonun ilgili üye işyerinde işlem yapma yetkisi bulunmamaktadır."
+  },
+  {
+    "code": 200000,
+    "key": "merchants.merchant_id_required",
+    "message": "Merchant id is required.",
+    "userMessage": "Üye işyeri bilgisi zorunludur."
+  },
+  {
+    "code": 200001,
+    "key": "merchants.merchant_code_required",
+    "message": "Merchant code is required.",
+    "userMessage": "Üye işyeri kodu zorunludur."
+  },
+  {
+    "code": 200002,
+    "key": "merchants.legal_name_required",
+    "message": "Legal name is required.",
+    "userMessage": "Üye işyeri yasal unvanı zorunludur."
+  },
+  {
+    "code": 200003,
+    "key": "merchants.display_name_required",
+    "message": "Display name is required.",
+    "userMessage": "Üye işyeri görünen adı zorunludur."
+  },
+  {
+    "code": 200004,
+    "key": "merchants.tax_number_required",
+    "message": "Tax number is required.",
+    "userMessage": "Vergi numarası zorunludur."
+  },
+  {
+    "code": 200010,
+    "key": "merchants.sector_code_required",
+    "message": "Sector code is required.",
+    "userMessage": "Sektör kodu zorunludur."
+  },
+  {
+    "code": 200011,
+    "key": "merchants.sector_name_required",
+    "message": "Sector name is required.",
+    "userMessage": "Sektör adı zorunludur."
+  },
+  {
+    "code": 200012,
+    "key": "merchants.sector_not_active",
+    "message": "Merchant sector is not active.",
+    "userMessage": "Üye işyerinin sektörü aktif değildir."
+  },
+  {
+    "code": 200020,
+    "key": "merchants.mcc_code_required",
+    "message": "Merchant category code is required.",
+    "userMessage": "MCC kodu zorunludur."
+  },
+  {
+    "code": 200021,
+    "key": "merchants.mcc_description_required",
+    "message": "Merchant category code description is required.",
+    "userMessage": "MCC açıklaması zorunludur."
+  },
+  {
+    "code": 200022,
+    "key": "merchants.mcc_not_active",
+    "message": "Merchant category code is not active.",
+    "userMessage": "Üye işyerinin MCC kodu aktif değildir."
+  },
+  {
+    "code": 200023,
+    "key": "merchants.mcc_restricted",
+    "message": "Merchant category code is restricted.",
+    "userMessage": "Bu MCC kodu ile işlem yapılamaz."
+  },
+  {
+    "code": 200030,
+    "key": "merchants.merchant_not_found",
+    "message": "Merchant was not found.",
+    "userMessage": "Üye işyeri bulunamadı."
+  },
+  {
+    "code": 200031,
+    "key": "merchants.merchant_not_active",
+    "message": "Merchant is not active.",
+    "userMessage": "Üye işyeri aktif değildir."
+  },
+  {
+    "code": 200032,
+    "key": "merchants.merchant_suspended",
+    "message": "Merchant is suspended.",
+    "userMessage": "Üye işyeri askıya alınmıştır."
+  },
+  {
+    "code": 200033,
+    "key": "merchants.merchant_closed",
+    "message": "Merchant is closed.",
+    "userMessage": "Üye işyeri kapatılmıştır."
+  },
+  {
+    "code": 200040,
+    "key": "merchants.payment_channel_already_exists",
+    "message": "Payment channel already exists for merchant.",
+    "userMessage": "Bu ödeme kanalı üye işyeri için zaten tanımlıdır."
+  },
+  {
+    "code": 200041,
+    "key": "merchants.payment_channel_not_enabled",
+    "message": "Payment channel is not enabled.",
+    "userMessage": "Bu ödeme kanalı aktif değildir."
+  },
+  {
+    "code": 200042,
+    "key": "merchants.invalid_channel_min_amount",
+    "message": "Payment channel minimum amount is invalid.",
+    "userMessage": "Ödeme kanalı minimum tutarı geçersizdir."
+  },
+  {
+    "code": 200043,
+    "key": "merchants.invalid_channel_max_amount",
+    "message": "Payment channel maximum amount is invalid.",
+    "userMessage": "Ödeme kanalı maksimum tutarı geçersizdir."
+  },
+  {
+    "code": 200044,
+    "key": "merchants.invalid_channel_daily_limit",
+    "message": "Payment channel daily amount limit is invalid.",
+    "userMessage": "Ödeme kanalı günlük limit değeri geçersizdir."
+  },
+  {
+    "code": 200045,
+    "key": "merchants.channel_amount_below_minimum",
+    "message": "Payment amount is below the channel minimum amount.",
+    "userMessage": "Ödeme tutarı bu kanal için belirlenen minimum tutarın altındadır."
+  },
+  {
+    "code": 200046,
+    "key": "merchants.channel_amount_limit_exceeded",
+    "message": "Payment amount exceeds the channel limit.",
+    "userMessage": "Ödeme tutarı bu kanal için belirlenen limiti aşmaktadır."
+  },
+  {
+    "code": 200050,
+    "key": "merchants.provider_code_required",
+    "message": "Provider code is required.",
+    "userMessage": "Ödeme sağlayıcı bilgisi zorunludur."
+  },
+  {
+    "code": 200051,
+    "key": "merchants.provider_account_not_found",
+    "message": "Merchant provider account was not found.",
+    "userMessage": "Üye işyerine ait ödeme sağlayıcı hesabı bulunamadı."
+  },
+  {
+    "code": 200052,
+    "key": "merchants.provider_account_not_active",
+    "message": "Merchant provider account is not active.",
+    "userMessage": "Üye işyerine ait ödeme sağlayıcı hesabı aktif değildir."
+  },
+  {
+    "code": 200053,
+    "key": "merchants.provider_account_channel_not_allowed",
+    "message": "Merchant provider account is not allowed for this payment channel.",
+    "userMessage": "Bu ödeme sağlayıcı hesabı seçilen ödeme kanalı için yetkili değildir."
+  },
+  {
+    "code": 200054,
+    "key": "merchants.provider_account_refund_not_allowed",
+    "message": "Merchant provider account does not allow refunds.",
+    "userMessage": "Bu ödeme sağlayıcı hesabı için iade işlemi yetkili değildir."
+  },
+  {
+    "code": 200055,
+    "key": "merchants.invalid_provider_account_priority",
+    "message": "Merchant provider account priority is invalid.",
+    "userMessage": "Ödeme sağlayıcı öncelik değeri geçersizdir."
+  },
+  {
+    "code": 200060,
+    "key": "merchants.encrypted_credential_payload_required",
+    "message": "Encrypted credential payload is required.",
+    "userMessage": "Şifrelenmiş ödeme sağlayıcı bilgisi zorunludur."
+  },
+  {
+    "code": 200061,
+    "key": "merchants.encryption_key_version_required",
+    "message": "Encryption key version is required.",
+    "userMessage": "Şifreleme anahtarı versiyon bilgisi zorunludur."
+  },
+  {
+    "code": 200062,
+    "key": "merchants.provider_credential_not_active",
+    "message": "Merchant provider credential is not active.",
+    "userMessage": "Üye işyerine ait ödeme sağlayıcı erişim bilgisi aktif değildir."
+  }
+]

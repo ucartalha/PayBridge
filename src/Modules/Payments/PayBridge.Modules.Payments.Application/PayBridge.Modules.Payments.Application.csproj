@@ -1,0 +1,22 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\BuildingBlocks\PayBridge.BuildingBlocks.CQRS\PayBridge.BuildingBlocks.CQRS.csproj" />
+    <ProjectReference Include="..\..\..\BuildingBlocks\PayBridge.BuildingBlocks.Results\PayBridge.BuildingBlocks.Results.csproj" />
+    <ProjectReference Include="..\..\Providers\PayBridge.Modules.Providers.Contracts\PayBridge.Modules.Providers.Contracts.csproj" />
+    <ProjectReference Include="..\PayBridge.Modules.Payments.Contracts\PayBridge.Modules.Payments.Contracts.csproj" />
+    <ProjectReference Include="..\PayBridge.Modules.Payments.Domain\PayBridge.Modules.Payments.Domain.csproj" />
+    <ProjectReference Include="..\..\..\BuildingBlocks\PayBridge.BuildingBlocks.Persistence\PayBridge.BuildingBlocks.Persistence.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="FluentValidation" Version="12.1.1" />
+  </ItemGroup>
+
+</Project>

@@ -1,0 +1,25 @@
+﻿namespace PayBridge.Modules.Merchants.Contracts.Merchants;
+
+public sealed record MerchantPaymentAccessInfo(
+    Guid MerchantId,
+    string MerchantCode,
+    string MerchantDisplayName,
+    string MerchantStatus,
+    Guid SectorId,
+    string SectorCode,
+    string SectorName,
+    bool SectorIsHighRisk,
+    bool SectorIsActive,
+    Guid MccId,
+    string MccCode,
+    string MccDescription,
+    bool MccIsRestricted,
+    bool MccIsActive,
+    string Channel,
+    bool ChannelIsEnabled,
+    decimal MinAmount,
+    decimal MaxAmount,
+    decimal? DailyAmountLimit,
+    bool Require3DS,
+    bool AllowRefund,
+    bool AllowVoid);

@@ -1,0 +1,25 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\BuildingBlocks\PayBridge.BuildingBlocks.Persistence\PayBridge.BuildingBlocks.Persistence.csproj" />
+    <ProjectReference Include="..\PayBridge.Modules.Merchants.Contracts\PayBridge.Modules.Merchants.Contracts.csproj" />
+    <ProjectReference Include="..\PayBridge.Modules.Merchants.Domain\PayBridge.Modules.Merchants.Domain.csproj" />
+    <ProjectReference Include="..\PayBridge.Modules.Merchants.Application\PayBridge.Modules.Merchants.Application.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.DataProtection" Version="10.0.9" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="8.*">
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+      <PrivateAssets>all</PrivateAssets>
+    </PackageReference>
+    <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="8.*" />
+  </ItemGroup>
+
+</Project>
