@@ -1,8 +1,8 @@
 ﻿using PayBridge.BuildingBlocks.Exceptions;
+using PayBridge.Modules.Merchants.Contracts.Credentials;
 using PayBridge.Modules.Merchants.Contracts.Merchants.Abstraction;
 using PayBridge.Modules.Payments.Application.Abstractions;
 using PayBridge.Modules.Providers.Contracts;
-using PayBridge.Modules.Providers.Contracts.Credentials;
 using System;
 using System.Collections.Generic;
 using System.Linq;

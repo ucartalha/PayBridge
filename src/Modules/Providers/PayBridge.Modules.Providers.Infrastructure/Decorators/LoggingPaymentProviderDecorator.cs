@@ -14,62 +14,69 @@ namespace PayBridge.Modules.Providers.Infrastructure.Decorators
         }
         public string ProviderCode => _inner.ProviderCode;
 
-        public async Task<ProviderChargeResponse> ChargeAsync(ProviderChargeRequest request, CancellationToken cancellationToken = default)
+        public async Task<ProviderChargeResponse> ChargeAsync(
+        ProviderChargeRequest request,
+        CancellationToken cancellationToken = default)
         {
-            var stopWatch = Stopwatch.StartNew();
+            var stopwatch = Stopwatch.StartNew();
+
+            ProviderChargeResponse response;
+
             try
             {
-                var response =await _inner.ChargeAsync(request, cancellationToken);
-
-                stopWatch.Stop();
-                _logger.LogInformation(
-                    "Provider request completed. " +
-                    "ProviderCode: {ProviderCode}, " +
-                    "PaymentId: {PaymentId}, " +
-                    "DurationMs: {DurationMs}" +
-                    "ErrorCode: {ErrorCode}, " +
-                    ProviderCode,
-                    request.PaymentId,
-                    stopWatch.ElapsedMilliseconds,
-                    response.ErrorCode
-                    );
-
-                return response;
-
+                response = await _inner.ChargeAsync(
+                    request,
+                    cancellationToken);
             }
             catch (OperationCanceledException)
+                when (cancellationToken.IsCancellationRequested)
             {
-                if (cancellationToken.IsCancellationRequested)
-                {
-                    stopWatch.Stop();
-                    _logger.LogInformation(
-               "Provider charge cancelled by request. " +
-               "ProviderCode: {ProviderCode}, " +
-               "PaymentId: {PaymentId}, " +
-               "DurationMs: {DurationMs}",
-               ProviderCode,
-               request.PaymentId,
-               stopWatch.ElapsedMilliseconds);
-                    throw;
-                }
+                stopwatch.Stop();
+
+                _logger.LogInformation(
+                    "Provider charge cancelled by request. " +
+                    "ProviderCode: {ProviderCode}, " +
+                    "PaymentId: {PaymentId}, " +
+                    "DurationMs: {DurationMs}",
+                    ProviderCode,
+                    request.PaymentId,
+                    stopwatch.ElapsedMilliseconds);
+
                 throw;
             }
-            catch(Exception exception) 
-            { 
-                stopWatch.Stop();
-                _logger.LogWarning(
+            catch (Exception exception)
+            {
+                stopwatch.Stop();
+
+                _logger.LogError(
+                    exception,
                     "Provider charge failed unexpectedly. " +
                     "ProviderCode: {ProviderCode}, " +
                     "PaymentId: {PaymentId}, " +
-                    "DurationMs: {DurationMs}, " +
-                    "ExceptionType: {ExceptionType}",
+                    "DurationMs: {DurationMs}",
                     ProviderCode,
                     request.PaymentId,
-                    stopWatch.ElapsedMilliseconds,
-                    exception.GetType().Name);
+                    stopwatch.ElapsedMilliseconds);
+
                 throw;
             }
 
+            stopwatch.Stop();
+
+            _logger.LogInformation(
+                "Provider charge completed. " +
+                "ProviderCode: {ProviderCode}, " +
+                "PaymentId: {PaymentId}, " +
+                "ProviderState: {ProviderState}, " +
+                "DurationMs: {DurationMs}, " +
+                "ErrorCode: {ErrorCode}",
+                ProviderCode,
+                request.PaymentId,
+                response.State,
+                stopwatch.ElapsedMilliseconds,
+                response.ErrorCode);
+
+            return response;
         }
 
         public async Task<ProviderInquiryResponse> InquiryAsync(ProviderInquiryRequest request, CancellationToken cancellationToken = default)

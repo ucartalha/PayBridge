@@ -6,6 +6,7 @@ using PayBridge.Api.Middleware;
 using PayBridge.Api.Modules;
 using PayBridge.BuildingBlocks.Security;
 using PayBridge.BuildingBlocks.Security.IntegrationTokens;
+using PayBridge.Modules.Merchants.Infrastructure.Persistence.Seed;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -67,6 +68,7 @@ app.UseMiddleware<CorrelationIdMiddleware>();
 
 if (app.Environment.IsDevelopment())
 {
+    await app.Services.SeedMerchantMockDataAsync();
     app.UseSwagger();
     app.UseSwaggerUI();
 }

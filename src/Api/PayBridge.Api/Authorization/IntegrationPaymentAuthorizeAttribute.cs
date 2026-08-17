@@ -2,17 +2,16 @@
 
 namespace PayBridge.Api.Authorization;
 
-public sealed class IntegrationPaymentAuthorizeAttribute : TypeFilterAttribute
+public sealed class IntegrationPaymentAuthorizeAttribute
+    : TypeFilterAttribute
 {
     public IntegrationPaymentAuthorizeAttribute(
-        string requiredScope,
-        bool requirePaymentAccess = true)
+        string requiredScope)
         : base(typeof(IntegrationPaymentAuthorizeFilter))
     {
         Arguments = new object[]
         {
-            requiredScope,
-            requirePaymentAccess
+            requiredScope
         };
     }
 }
