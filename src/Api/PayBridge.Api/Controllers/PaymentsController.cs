@@ -2,6 +2,7 @@
 using PayBridge.Api.Authorization;
 using PayBridge.Modules.Payments.Application.Abstractions;
 using PayBridge.Modules.Payments.Application.Payments.CreatePayment;
+using PayBridge.Modules.Payments.Application.Payments.PaymentsExecution;
 
 namespace PayBridge.Api.Controllers;
 
@@ -19,7 +20,7 @@ public sealed class PaymentsController : ControllerBase
     [HttpPost]
     [IntegrationPaymentAuthorize("payments:create")]
     public async Task<IActionResult> CreatePayment(
-        [FromBody] CreatePaymentCommand command,
+        [FromBody] PaymentExecutionRequest command,
         CancellationToken cancellationToken)
     {
         var result = await _paymentOrchestrator.ExecutePaymentAsync(

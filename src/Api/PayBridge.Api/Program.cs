@@ -2,6 +2,7 @@ using Microsoft.OpenApi.Models;
 using PayBridge.Api.Authorization;
 using PayBridge.Api.Errors;
 using PayBridge.Api.Exceptions;
+using PayBridge.Api.Middleware;
 using PayBridge.Api.Modules;
 using PayBridge.BuildingBlocks.Security;
 using PayBridge.BuildingBlocks.Security.IntegrationTokens;
@@ -62,6 +63,7 @@ builder.Services.AddModules(builder.Configuration);
 var app = builder.Build();
 
 app.UseExceptionHandler();
+app.UseMiddleware<CorrelationIdMiddleware>();
 
 if (app.Environment.IsDevelopment())
 {
