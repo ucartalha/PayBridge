@@ -27,6 +27,20 @@ namespace PayBridge.Modules.Providers.Infrastructure.Decorators
                 response = await _inner.ChargeAsync(
                     request,
                     cancellationToken);
+                stopwatch.Stop();
+
+                _logger.LogInformation(
+                    "Provider Charge completed. " +
+                    "ProviderCode: {ProviderCode}, " +
+                    "PaymentId: {PaymentId}, " +
+                    "ProviderState: {ProviderState}, " +
+                    "DurationMs: {DurationMs}, " +
+                    "ErrorCode: {ErrorCode}",
+                    ProviderCode,
+                    request.PaymentId,
+                    response.State,
+                    stopwatch.ElapsedMilliseconds,
+                    response.ErrorCode);
             }
             catch (OperationCanceledException)
                 when (cancellationToken.IsCancellationRequested)

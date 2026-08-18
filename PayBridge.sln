@@ -59,7 +59,12 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "IntegrationTests", "Integra
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PayBridge.Api.IntegrationTests", "tests\IntegrationTests\PayBridge.Api.IntegrationTests\PayBridge.Api.IntegrationTests.csproj", "{F1F3DD2E-9D62-4B44-86FC-35F4C9BFD9CA}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PayBridge.BuildingBlocks.Security", "src\BuildingBlocks\PayBridge.BuildingBlocks.Security\PayBridge.BuildingBlocks.Security.csproj", "{79DEA197-4C99-4369-B1C7-9009CC661F39}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PayBridge.BuildingBlocks.Security", "src\BuildingBlocks\PayBridge.BuildingBlocks.Security\PayBridge.BuildingBlocks.Security.csproj", "{79DEA197-4C99-4369-B1C7-9009CC661F39}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{ECAC6DDE-3B48-40CF-8C6F-AA0B0656F0BA}"
+	ProjectSection(SolutionItems) = preProject
+		docker-compose.yml = docker-compose.yml
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

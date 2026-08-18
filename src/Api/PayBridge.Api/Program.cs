@@ -1,3 +1,6 @@
+using Elastic.Ingest.Elasticsearch;
+using Elastic.Ingest.Elasticsearch.DataStreams;
+using Elastic.Serilog.Sinks;
 using Microsoft.OpenApi.Models;
 using PayBridge.Api.Authorization;
 using PayBridge.Api.Errors;
@@ -7,8 +10,39 @@ using PayBridge.Api.Modules;
 using PayBridge.BuildingBlocks.Security;
 using PayBridge.BuildingBlocks.Security.IntegrationTokens;
 using PayBridge.Modules.Merchants.Infrastructure.Persistence.Seed;
+using Serilog;
+using Serilog.Events;
 
 var builder = WebApplication.CreateBuilder(args);
+var elasticSearchUri =
+    builder.Configuration["ElasticSearch:Uri"]
+    ?? throw new InvalidOperationException(
+        "ElasticSearch Uri configuration was not found.");
+builder.Services.AddSerilog((services, configuration) =>
+{
+    configuration
+        .MinimumLevel.Information()
+        .MinimumLevel.Override(
+            "Microsoft.AspNetCore",
+            LogEventLevel.Warning)
+        .ReadFrom.Configuration(builder.Configuration)
+        .ReadFrom.Services(services)
+        .Enrich.FromLogContext()
+        .WriteTo.Console()
+        .WriteTo.Elasticsearch(
+            new[] { new Uri(elasticSearchUri) },
+            options =>
+            {
+                options.DataStream =
+                    new DataStreamName(
+                        "logs",
+                        "paybridge-api",
+                        "development");
+
+                options.BootstrapMethod =
+                    BootstrapMethod.Failure;
+            });
+});
 
 builder.Services.AddControllers();
 

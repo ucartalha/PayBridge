@@ -28,8 +28,7 @@ namespace PayBridge.BuildingBlocks.CQRS.Behaviors
                 var response = await next();
                 stopWatch.Stop();
                 _logger.LogInformation(
-                "CQRS request completed. " +
-                "RequestName: {RequestName}, DurationMs: {DurationMs}",
+                "CQRS request completed. RequestName: {RequestName}, DurationMs: {DurationMs}",
                 requestName,
                 stopWatch.ElapsedMilliseconds);
                 return response;
