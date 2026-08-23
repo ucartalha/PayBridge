@@ -4,13 +4,15 @@
 		<TargetFramework>net8.0</TargetFramework>
 		<Nullable>enable</Nullable>
 		<ImplicitUsings>enable</ImplicitUsings>
-	</PropertyGroup>
+	  <UserSecretsId>d2508e3e-8bc8-4c04-9870-092b1cbccf7c</UserSecretsId>
+  </PropertyGroup>
 	<ItemGroup>
 		<None Update="Errors\errors.tr.json">
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 		</None>
 	</ItemGroup>
 	<ItemGroup>
+		<PackageReference Include="Elastic.Apm.NetCoreAll" Version="1.34.5" />
 		<PackageReference Include="Elastic.Serilog.Sinks" Version="8.11.1" />
 		<PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="8.0.8" />
 		<PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="8.*">

@@ -12,12 +12,30 @@ using PayBridge.BuildingBlocks.Security.IntegrationTokens;
 using PayBridge.Modules.Merchants.Infrastructure.Persistence.Seed;
 using Serilog;
 using Serilog.Events;
+using Elastic.Transport;
+using PayBridge.Api.Observability;
+using PayBridge.BuildingBlocks.CQRS.Observability;
 
 var builder = WebApplication.CreateBuilder(args);
+builder.Services.AddAllElasticApm();
+
+builder.Services.AddSingleton<
+    IApplicationTracer,
+    ElasticApplicationTracer>();
 var elasticSearchUri =
     builder.Configuration["ElasticSearch:Uri"]
     ?? throw new InvalidOperationException(
         "ElasticSearch Uri configuration was not found.");
+
+var elasticSearchUsername =
+    builder.Configuration["ElasticSearch:Username"]
+    ?? throw new InvalidOperationException(
+        "ElasticSearch username configuration was not found.");
+
+var elasticSearchPassword =
+    builder.Configuration["ElasticSearch:Password"]
+    ?? throw new InvalidOperationException(
+        "ElasticSearch password configuration was not found.");
 builder.Services.AddSerilog((services, configuration) =>
 {
     configuration
@@ -37,10 +55,18 @@ builder.Services.AddSerilog((services, configuration) =>
                     new DataStreamName(
                         "logs",
                         "paybridge-api",
-                        "development");
+                        builder.Environment.EnvironmentName
+                            .ToLowerInvariant());
 
                 options.BootstrapMethod =
                     BootstrapMethod.Failure;
+            },
+            transport =>
+            {
+                transport.Authentication(
+                    new BasicAuthentication(
+                        elasticSearchUsername,
+                        elasticSearchPassword));
             });
 });
 

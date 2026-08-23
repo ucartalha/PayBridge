@@ -20,11 +20,11 @@ namespace PayBridge.Modules.Providers.Infrastructure.Decorators
         {
             var stopwatch = Stopwatch.StartNew();
 
-            ProviderChargeResponse response;
+           
 
             try
             {
-                response = await _inner.ChargeAsync(
+                var response = await _inner.ChargeAsync(
                     request,
                     cancellationToken);
                 stopwatch.Stop();
@@ -41,6 +41,7 @@ namespace PayBridge.Modules.Providers.Infrastructure.Decorators
                     response.State,
                     stopwatch.ElapsedMilliseconds,
                     response.ErrorCode);
+                return response;
             }
             catch (OperationCanceledException)
                 when (cancellationToken.IsCancellationRequested)
@@ -75,22 +76,7 @@ namespace PayBridge.Modules.Providers.Infrastructure.Decorators
                 throw;
             }
 
-            stopwatch.Stop();
-
-            _logger.LogInformation(
-                "Provider charge completed. " +
-                "ProviderCode: {ProviderCode}, " +
-                "PaymentId: {PaymentId}, " +
-                "ProviderState: {ProviderState}, " +
-                "DurationMs: {DurationMs}, " +
-                "ErrorCode: {ErrorCode}",
-                ProviderCode,
-                request.PaymentId,
-                response.State,
-                stopwatch.ElapsedMilliseconds,
-                response.ErrorCode);
-
-            return response;
+            
         }
 
         public async Task<ProviderInquiryResponse> InquiryAsync(ProviderInquiryRequest request, CancellationToken cancellationToken = default)

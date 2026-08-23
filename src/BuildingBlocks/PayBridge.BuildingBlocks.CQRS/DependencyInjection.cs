@@ -31,6 +31,7 @@ namespace PayBridge.BuildingBlocks.CQRS
             services.AddMediatR(cfg => {
                 cfg.RegisterServicesFromAssemblies(assemblies);
                 cfg.AddOpenBehavior(typeof(LoggingBehavior<,>));
+                cfg.AddOpenBehavior(typeof(ApmBehavior<,>));
                 cfg.AddOpenBehavior(typeof(ValidationBehavior<,>));
                 cfg.AddOpenBehavior(typeof(IdempotencyBehavior<,>));
                 cfg.AddOpenBehavior(typeof(TransactionBehavior<,>));
