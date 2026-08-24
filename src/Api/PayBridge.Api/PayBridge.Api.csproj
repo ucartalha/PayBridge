@@ -25,6 +25,7 @@
 		<PackageReference Include="Swashbuckle.AspNetCore" Version="6.4.0" />
 	</ItemGroup>
 	<ItemGroup>
+	  <ProjectReference Include="..\..\..\PayBridge.BuildingBlocks.Redis\PayBridge.BuildingBlocks.Redis.csproj" />
 	  <ProjectReference Include="..\..\Modules\Merchants\PayBridge.Modules.Merchants.Infrastructure\PayBridge.Modules.Merchants.Infrastructure.csproj" />
 	  <ProjectReference Include="..\..\Modules\Payments\PayBridge.Modules.Payments.Infrastructure\PayBridge.Modules.Payments.Infrastructure.csproj" />
 	  <ProjectReference Include="..\..\Modules\Providers\PayBridge.Modules.Providers.Infrastructure\PayBridge.Modules.Providers.Infrastructure.csproj" />

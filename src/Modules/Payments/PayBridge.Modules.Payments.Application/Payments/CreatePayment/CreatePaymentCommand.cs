@@ -7,4 +7,4 @@ public sealed record CreatePaymentCommand(
     string OrderId,
     decimal Amount,
     string Currency,
-    string ProviderCode) : ICommand<CreatePaymentResult>, IIdempotentCommand<CreatePaymentResult>;
+    string ProviderCode) : ICommand<CreatePaymentResult>;

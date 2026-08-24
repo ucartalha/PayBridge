@@ -7,6 +7,8 @@ namespace PayBridge.Api.Exceptions;
 
 public sealed class GlobalExceptionHandler : IExceptionHandler
 {
+    private const int IdempotencyInProgressErrorCode = 90003;
+
     private readonly ILogger<GlobalExceptionHandler> _logger;
     private readonly IErrorCatalog _errorCatalog;
 
@@ -59,6 +61,15 @@ public sealed class GlobalExceptionHandler : IExceptionHandler
     {
         switch (exception)
         {
+            case IdempotencyInProgressException:
+                _logger.LogInformation(
+                    "Idempotent request rejected because the same operation is already in progress. " +
+                    "TraceId: {TraceId}, StatusCode: {StatusCode}",
+                    httpContext.TraceIdentifier,
+                    statusCode);
+
+                break;
+
             case BusinessException businessException:
                 _logger.LogInformation(
                     "Business request rejected. " +
@@ -105,6 +116,21 @@ public sealed class GlobalExceptionHandler : IExceptionHandler
         Exception exception,
         int statusCode)
     {
+        if (exception is IdempotencyInProgressException)
+        {
+            return new ApiErrorResponse
+            {
+                StatusCode = statusCode,
+                TraceId = httpContext.TraceIdentifier,
+                Error = new ApiError
+                {
+                    Code = IdempotencyInProgressErrorCode,
+                    Key = "idempotency.in_progress",
+                    Message = "Aynı işlem şu anda işleniyor. Lütfen kısa süre sonra tekrar deneyin."
+                }
+            };
+        }
+
         if (exception is BusinessException businessException)
         {
             var descriptor = _errorCatalog.GetByCode(
@@ -173,6 +199,9 @@ public sealed class GlobalExceptionHandler : IExceptionHandler
     {
         return exception switch
         {
+            IdempotencyInProgressException =>
+                StatusCodes.Status409Conflict,
+
             BusinessException =>
                 StatusCodes.Status400BadRequest,
 

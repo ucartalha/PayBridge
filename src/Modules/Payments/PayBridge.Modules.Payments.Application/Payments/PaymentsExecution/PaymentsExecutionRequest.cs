@@ -1,4 +1,6 @@
-﻿namespace PayBridge.Modules.Payments.Application
+﻿using PayBridge.BuildingBlocks.CQRS;
+
+namespace PayBridge.Modules.Payments.Application
     .Payments.PaymentsExecution;
 
 public sealed record PaymentExecutionRequest(
@@ -9,4 +11,5 @@ public sealed record PaymentExecutionRequest(
     decimal Amount,
     string Currency,
     string ProviderCode,
-    string Channel);
+    string Channel)
+    : IIdempotentRequest<PaymentExecutionResult>;

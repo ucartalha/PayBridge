@@ -67,6 +67,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		docker-compose.yml = docker-compose.yml
 	EndProjectSection
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PayBridge.BuildingBlocks.Redis", "PayBridge.BuildingBlocks.Redis\PayBridge.BuildingBlocks.Redis.csproj", "{F28EDBEC-3CB4-4B72-B4E1-52D181F497F7}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -149,6 +151,10 @@ Global
 		{79DEA197-4C99-4369-B1C7-9009CC661F39}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{79DEA197-4C99-4369-B1C7-9009CC661F39}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{79DEA197-4C99-4369-B1C7-9009CC661F39}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F28EDBEC-3CB4-4B72-B4E1-52D181F497F7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F28EDBEC-3CB4-4B72-B4E1-52D181F497F7}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F28EDBEC-3CB4-4B72-B4E1-52D181F497F7}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F28EDBEC-3CB4-4B72-B4E1-52D181F497F7}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -181,6 +187,7 @@ Global
 		{F65E4E5A-B4A8-42F3-ACC1-A1D6CC974347} = {6F98B677-7D6B-49E4-8B02-296E2D743AE9}
 		{F1F3DD2E-9D62-4B44-86FC-35F4C9BFD9CA} = {F65E4E5A-B4A8-42F3-ACC1-A1D6CC974347}
 		{79DEA197-4C99-4369-B1C7-9009CC661F39} = {F9E1FBE8-A9E5-421B-A16E-CB95E7F4EAAB}
+		{F28EDBEC-3CB4-4B72-B4E1-52D181F497F7} = {F9E1FBE8-A9E5-421B-A16E-CB95E7F4EAAB}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {419E37B4-0E64-420B-9F54-D548DB5EC3D4}

@@ -108,6 +108,12 @@
     "userMessage": "Geçerli ödeme bulunamadı."
   },
   {
+    "code": 100052,
+    "key": "payments.alreadyinprogress",
+    "message": "Payment already in progress.",
+    "userMessage": "Ödeme işleniyor."
+  },
+  {
     "code": 110001,
     "key": "payment_transactions.payment_id_required",
     "message": "PaymentId is required while creating payment transaction.",

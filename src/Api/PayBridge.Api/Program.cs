@@ -38,15 +38,18 @@ var elasticSearchPassword =
         "ElasticSearch password configuration was not found.");
 builder.Services.AddSerilog((services, configuration) =>
 {
-    configuration
+        configuration
         .MinimumLevel.Information()
         .MinimumLevel.Override(
             "Microsoft.AspNetCore",
             LogEventLevel.Warning)
+        .MinimumLevel.Override(
+            "Microsoft.EntityFrameworkCore.Database.Command",
+            LogEventLevel.Warning)
         .ReadFrom.Configuration(builder.Configuration)
         .ReadFrom.Services(services)
         .Enrich.FromLogContext()
-        .WriteTo.Console()
+        //.WriteTo.Console()
         .WriteTo.Elasticsearch(
             new[] { new Uri(elasticSearchUri) },
             options =>

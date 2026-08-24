@@ -1,54 +1,101 @@
-﻿using PayBridge.BuildingBlocks.Persistence;
+﻿using Microsoft.Data.SqlClient;
+using Microsoft.EntityFrameworkCore;
+using PayBridge.BuildingBlocks.Exceptions;
+using PayBridge.BuildingBlocks.Persistence;
 using PayBridge.BuildingBlocks.Persistence.Idempotency;
 using PayBridge.Modules.Payments.Domain.Payments.Entities;
+using PayBridge.Modules.Payments.Domain.Payments.Errors;
 
 namespace PayBridge.Modules.Payments.Infrastructure.Persistence.Idempotency;
 
 internal sealed class PaymentsIdempotencyService : IIdempotencyService
 {
     private readonly IRepository<IdempotencyRecord> _repository;
-    private readonly PaymentsUnitOfWork _unitOfWork; // Doğrudan modülün kendi UnitOfWork'ünü inject ediyoruz
+    private readonly PaymentsUnitOfWork _unitOfWork;
+    private readonly PaymentsDbContext _dbContext;
 
     public PaymentsIdempotencyService(
         IRepository<IdempotencyRecord> repository,
-        PaymentsUnitOfWork unitOfWork)
+        PaymentsUnitOfWork unitOfWork,
+        PaymentsDbContext dbContext)
     {
         _repository = repository;
         _unitOfWork = unitOfWork;
+        _dbContext = dbContext;
     }
 
-    public async Task<string?> GetInFlightOrCompletedResultAsync(string key, CancellationToken cancellationToken)
+    public async Task<string?> TryAcquireOrGetCompletedResultAsync(
+        string key,
+        CancellationToken cancellationToken)
     {
-        var record = await _repository.FirstOrDefaultAsync(x => x.IdempotencyKey == key, cancellationToken);
-        if (record is null) return null;
+        var candidate = IdempotencyRecord.CreateInFlight(key);
 
-        // Domain metodundan ham string sonucunu alıyoruz
-        var result = record.CheckStatusAndGetResult();
+        await _repository.AddAsync(
+            candidate,
+            cancellationToken);
 
-        // Eğer kayıt Completed ama içeriği henüz boşsa (kıl payı durumlar için) işaretçi dönüyoruz
-        return result ?? "InFlight_Handled";
-    }
-
-    public async Task CreateInFlightAsync(string key, CancellationToken cancellationToken)
-    {
-        var record = IdempotencyRecord.CreateInFlight(key);
-        await _repository.AddAsync(record, cancellationToken);
-
-        // KRİTİK DÜZELTME 1: InFlight kaydını hemen DB'ye kaydet ki kilitlensin!
-        await _unitOfWork.SaveChangesAsync(cancellationToken);
-    }
-
-    public async Task CompleteAsync(string key, object result, CancellationToken cancellationToken)
-    {
-        var record = await _repository.FirstOrDefaultAsync(x => x.IdempotencyKey == key, cancellationToken);
-        if (record is not null)
+        try
         {
-            record.Complete(result); // DDD: State değişti
-
-            _repository.Update(record);
-
-            // KRİTİK DÜZELTME 2: İşlem bittiğinde Completed durumunu hemen DB'ye push et!
+            // İlk request key'in sahibi olmaya çalışıyor.
             await _unitOfWork.SaveChangesAsync(cancellationToken);
+
+            // INSERT başarılıysa bu request owner.
+            return null;
         }
+        catch (DbUpdateException ex)
+            when (ex.InnerException is SqlException sqlException &&
+                  sqlException.Number is 2601 or 2627)
+        {
+            // Başarısız INSERT entity'si ChangeTracker'da Added kalmasın.
+            _dbContext.Entry(candidate).State = EntityState.Detached;
+
+            var existingRecord =
+                await _dbContext.IdempotencyRecords
+                    .AsNoTracking()
+                    .SingleOrDefaultAsync(
+                        x => x.IdempotencyKey == key,
+                        cancellationToken);
+
+            // PK hatası aldık ama kayıt artık yoksa bu normal
+            // duplicate senaryosu değildir.
+            if (existingRecord is null)
+            {
+                throw;
+            }
+
+            // Önceki işlem tamamen bittiyse final response'u replay et.
+            if (existingRecord.Status == "Completed" &&
+                !string.IsNullOrWhiteSpace(existingRecord.ResponseContent))
+            {
+                return existingRecord.ResponseContent;
+            }
+                
+            // Kayıt mevcut ama işlem halen devam ediyor.
+            throw new BusinessException(
+                (int)PaymentErrorCode.PaymentAlreadyInProgress,
+                ex);
+        }
+    }
+
+    public async Task CompleteAsync(
+        string key,
+        object result,
+        CancellationToken cancellationToken)
+    {
+        var record =
+            await _repository.FirstOrDefaultAsync(
+                x => x.IdempotencyKey == key,
+                cancellationToken);
+
+        if (record is null)
+        {
+            return;
+        }
+
+        record.Complete(result);
+
+        // FirstOrDefaultAsync tracked entity döndürdüğü için
+        // ayrıca Update(record) çağırmaya gerek yok.
+        await _unitOfWork.SaveChangesAsync(cancellationToken);
     }
 }

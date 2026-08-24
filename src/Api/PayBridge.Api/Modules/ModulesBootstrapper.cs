@@ -9,11 +9,14 @@ namespace PayBridge.Api.Modules
     {
         public static IServiceCollection AddModules(this IServiceCollection services, IConfiguration configuration)
         {
-            services.AddCQRS();
 
+            services.AddRedisInfrastructure(configuration);
+            
             services.AddMerchantsModule(configuration);
             services.AddPaymentsModule(configuration);
             services.AddProvidersModule(configuration);
+
+            services.AddCQRS();
 
             return services;
         }

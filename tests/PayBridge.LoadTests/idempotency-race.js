@@ -83,7 +83,7 @@ export default function (data) {
             'MOCK-MERCHANT',
 
         orderId:
-            'LOAD-IDEMPOTENCY-RACE-001',
+            'LOAD-IDEMPOTENCY-RACE-011',
 
         amount:
             10,

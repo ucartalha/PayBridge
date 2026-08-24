@@ -23,5 +23,6 @@ public enum PaymentErrorCode
 
     OnlyPendingOrProcessingPaymentCanBeExpired = 100040,
 
-    PaymentNotFound = 100051
+    PaymentNotFound = 100051,
+    PaymentAlreadyInProgress = 100052
 }
