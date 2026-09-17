@@ -9,6 +9,6 @@ namespace PayBridge.BuildingBlocks.CQRS
 {
     public interface IIdempotentRequest<TResponse>: IRequest<TResponse>
     {
-
+        TResponse CreateInProgressResponse();
     }
 }

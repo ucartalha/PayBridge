@@ -36,10 +36,6 @@ public static class DependencyInjection
                 "IntegrationAuth SigningKey must be at least 32 characters.");
         }
 
-        services.AddStackExchangeRedisCache(options =>
-        {
-            options.Configuration = configuration.GetConnectionString("Redis");
-        });
 
         services.Configure<IntegrationAuthOptions>(
             configuration.GetSection("IntegrationAuth"));

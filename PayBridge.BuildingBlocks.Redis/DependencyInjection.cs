@@ -1,8 +1,11 @@
-﻿using Microsoft.Extensions.Configuration;
+﻿using Microsoft.Extensions.Caching.StackExchangeRedis;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using PayBridge.BuildingBlocks.Persistence.Idempotency;
 using PayBridge.BuildingBlocks.Redis.Idempotency;
 using StackExchange.Redis;
+
+namespace PayBridge.BuildingBlocks.Redis;
 
 public static class DependencyInjection
 {
@@ -24,6 +27,20 @@ public static class DependencyInjection
 
             return ConnectionMultiplexer.Connect(options);
         });
+
+        services.AddStackExchangeRedisCache(options =>
+        {
+            options.Configuration = connectionString;
+        });
+
+        services
+            .AddOptions<RedisCacheOptions>()
+            .Configure<IConnectionMultiplexer>(
+                (options, multiplexer) =>
+                {
+                    options.ConnectionMultiplexerFactory =
+                        () => Task.FromResult(multiplexer);
+                });
 
         services.AddSingleton<
             IIdempotencyGate,

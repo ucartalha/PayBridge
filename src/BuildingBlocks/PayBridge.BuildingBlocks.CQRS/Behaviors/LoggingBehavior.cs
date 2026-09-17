@@ -37,7 +37,8 @@ namespace PayBridge.BuildingBlocks.CQRS.Behaviors
             {
                 stopWatch.Stop();
 
-                if (exception is BusinessException or ValidationException)
+                if (exception is BusinessException or ValidationException or
+    IdempotencyInProgressException)
                 {
                     _logger.LogInformation(
                         "CQRS request rejected. " +

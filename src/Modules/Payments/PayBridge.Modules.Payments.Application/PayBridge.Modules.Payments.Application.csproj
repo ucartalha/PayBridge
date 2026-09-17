@@ -9,6 +9,7 @@
   <ItemGroup>
     <ProjectReference Include="..\..\..\BuildingBlocks\PayBridge.BuildingBlocks.CQRS\PayBridge.BuildingBlocks.CQRS.csproj" />
     <ProjectReference Include="..\..\..\BuildingBlocks\PayBridge.BuildingBlocks.Results\PayBridge.BuildingBlocks.Results.csproj" />
+    <ProjectReference Include="..\..\Merchants\PayBridge.Modules.Merchants.Domain\PayBridge.Modules.Merchants.Domain.csproj" />
     <ProjectReference Include="..\..\Providers\PayBridge.Modules.Providers.Contracts\PayBridge.Modules.Providers.Contracts.csproj" />
     <ProjectReference Include="..\PayBridge.Modules.Payments.Contracts\PayBridge.Modules.Payments.Contracts.csproj" />
     <ProjectReference Include="..\PayBridge.Modules.Payments.Domain\PayBridge.Modules.Payments.Domain.csproj" />

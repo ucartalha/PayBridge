@@ -1,4 +1,6 @@
 ﻿using MediatR;
+using PayBridge.BuildingBlocks.Exceptions;
+using PayBridge.BuildingBlocks.Results;
 using PayBridge.Modules.Payments.Application.Abstractions;
 
 namespace PayBridge.Modules.Payments.Application
@@ -7,22 +9,39 @@ namespace PayBridge.Modules.Payments.Application
 internal sealed class PaymentExecutionRequestHandler
     : IRequestHandler<
         PaymentExecutionRequest,
-        PaymentExecutionResult>
+        Result<PaymentExecutionResult>>
 {
-    private readonly IPaymentOrchestrator _paymentOrchestrator;
+    private readonly IPaymentOrchestrator
+        _paymentOrchestrator;
 
     public PaymentExecutionRequestHandler(
         IPaymentOrchestrator paymentOrchestrator)
     {
-        _paymentOrchestrator = paymentOrchestrator;
+        _paymentOrchestrator =
+            paymentOrchestrator;
     }
 
-    public Task<PaymentExecutionResult> Handle(
-        PaymentExecutionRequest request,
-        CancellationToken cancellationToken)
+    public async Task<Result<PaymentExecutionResult>>
+        Handle(
+            PaymentExecutionRequest request,
+            CancellationToken cancellationToken)
     {
-        return _paymentOrchestrator.ExecutePaymentAsync(
-            request,
-            cancellationToken);
+        try
+        {
+            var result =
+                await _paymentOrchestrator
+                    .ExecutePaymentAsync(
+                        request,
+                        cancellationToken);
+
+            return Result<PaymentExecutionResult>
+                .Success(result);
+        }
+        catch (BusinessException exception)
+        {
+            return Result<PaymentExecutionResult>
+                .BusinessFailure(
+                    exception.ErrorCode);
+        }
     }
 }

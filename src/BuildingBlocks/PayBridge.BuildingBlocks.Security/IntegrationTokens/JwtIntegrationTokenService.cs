@@ -38,7 +38,7 @@ public sealed class JwtIntegrationTokenService : IIntegrationTokenService
         var value = await _cache.GetStringAsync(
             cacheKey,
             cancellationToken);
-
+        
         return !string.IsNullOrWhiteSpace(value);
     }
 

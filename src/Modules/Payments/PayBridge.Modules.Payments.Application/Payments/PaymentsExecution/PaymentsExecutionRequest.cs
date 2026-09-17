@@ -1,4 +1,6 @@
 ﻿using PayBridge.BuildingBlocks.CQRS;
+using PayBridge.BuildingBlocks.Persistence.Idempotency;
+using PayBridge.BuildingBlocks.Results;
 
 namespace PayBridge.Modules.Payments.Application
     .Payments.PaymentsExecution;
@@ -12,4 +14,13 @@ public sealed record PaymentExecutionRequest(
     string Currency,
     string ProviderCode,
     string Channel)
-    : IIdempotentRequest<PaymentExecutionResult>;
+    : IIdempotentRequest<Result<PaymentExecutionResult>>
+{
+    public Result<PaymentExecutionResult>
+        CreateInProgressResponse()
+    {
+        return Result<PaymentExecutionResult>
+            .Conflict(
+                IdempotencyErrorCodes.InProgress);
+    }
+}

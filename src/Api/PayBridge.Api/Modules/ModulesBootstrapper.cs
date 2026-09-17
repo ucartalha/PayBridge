@@ -1,4 +1,5 @@
 ﻿using PayBridge.BuildingBlocks.CQRS;
+using PayBridge.BuildingBlocks.Redis;
 using PayBridge.Modules.Merchants.Infrastructure;
 using PayBridge.Modules.Payments.Infrastructure;
 using PayBridge.Modules.Providers.Infrastructure;

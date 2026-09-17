@@ -1,5 +1,4 @@
 ﻿using MediatR;
-using PayBridge.BuildingBlocks.Exceptions;
 using PayBridge.BuildingBlocks.Persistence.Idempotency;
 using System.Text.Json;
 
@@ -16,15 +15,21 @@ public sealed class IdempotencyBehavior<TRequest, TResponse>
     private static readonly TimeSpan CompletedTtl =
         TimeSpan.FromMinutes(30);
 
-    private readonly IIdempotencyGate _idempotencyGate;
-    private readonly IIdempotencyService _idempotencyService;
+    private readonly IIdempotencyGate
+        _idempotencyGate;
+
+    private readonly IIdempotencyService
+        _idempotencyService;
 
     public IdempotencyBehavior(
         IIdempotencyGate idempotencyGate,
         IIdempotencyService idempotencyService)
     {
-        _idempotencyGate = idempotencyGate;
-        _idempotencyService = idempotencyService;
+        _idempotencyGate =
+            idempotencyGate;
+
+        _idempotencyService =
+            idempotencyService;
     }
 
     public async Task<TResponse> Handle(
@@ -32,7 +37,9 @@ public sealed class IdempotencyBehavior<TRequest, TResponse>
         RequestHandlerDelegate<TResponse> next,
         CancellationToken cancellationToken)
     {
-        if (request is not IIdempotentRequest<TResponse>)
+        if (request is not
+            IIdempotentRequest<TResponse>
+            idempotentRequest)
         {
             return await next();
         }
@@ -41,10 +48,11 @@ public sealed class IdempotencyBehavior<TRequest, TResponse>
             GenerateIdempotencyKey(request);
 
         var gateResult =
-            await _idempotencyGate.TryAcquireOrGetAsync(
-                idempotencyKey,
-                InFlightTtl,
-                cancellationToken);
+            await _idempotencyGate
+                .TryAcquireOrGetAsync(
+                    idempotencyKey,
+                    InFlightTtl,
+                    cancellationToken);
 
         switch (gateResult.Status)
         {
@@ -53,16 +61,22 @@ public sealed class IdempotencyBehavior<TRequest, TResponse>
                     gateResult.ResponseContent);
 
             case IdempotencyGateStatus.InFlight:
-                throw new IdempotencyInProgressException();
+
+                // NORMAL RESPONSE.
+                // Exception yok.
+                return idempotentRequest
+                    .CreateInProgressResponse();
 
             case IdempotencyGateStatus.Unavailable:
                 return await ExecuteWithSqlFallbackAsync(
+                    idempotentRequest,
                     idempotencyKey,
                     next,
                     cancellationToken);
 
             case IdempotencyGateStatus.Acquired:
-                return await ExecuteAsGateOwnerAsync(
+                return await ExecuteAsOwnerAsync(
+                    idempotentRequest,
                     idempotencyKey,
                     gateResult.LeaseToken,
                     next,
@@ -74,8 +88,9 @@ public sealed class IdempotencyBehavior<TRequest, TResponse>
         }
     }
 
-    private async Task<TResponse> ExecuteAsGateOwnerAsync(
-        string idempotencyKey,
+    private async Task<TResponse> ExecuteAsOwnerAsync(
+        IIdempotentRequest<TResponse> request,
+        string key,
         string? leaseToken,
         RequestHandlerDelegate<TResponse> next,
         CancellationToken cancellationToken)
@@ -83,53 +98,70 @@ public sealed class IdempotencyBehavior<TRequest, TResponse>
         if (string.IsNullOrWhiteSpace(leaseToken))
         {
             throw new InvalidOperationException(
-                "An acquired idempotency gate must contain a lease token.");
+                "Acquired Redis gate does not contain a lease token.");
         }
 
         try
         {
-            // Redis gate'i kazandık fakat SQL hala source of truth.
-            //
-            // Örneğin:
-            // Redis restart etmiş olabilir,
-            // fakat aynı key SQL'de daha önce Completed olabilir.
-            var completedResult =
+            var storeResult =
                 await _idempotencyService
-                    .TryAcquireOrGetCompletedResultAsync(
-                        idempotencyKey,
+                    .TryAcquireOrGetAsync(
+                        key,
                         cancellationToken);
 
-            if (completedResult is not null)
+            switch (storeResult.Status)
             {
-                // SQL'de Completed bulduk.
-                // Redis cache'i yeniden dolduruyoruz.
-                await _idempotencyGate.MarkCompletedAsync(
-                    idempotencyKey,
-                    leaseToken,
-                    completedResult,
-                    CompletedTtl,
-                    cancellationToken);
+                case IdempotencyStoreStatus.Completed:
+                    {
+                        await _idempotencyGate
+                            .MarkCompletedAsync(
+                                key,
+                                leaseToken,
+                                storeResult.ResponseContent!,
+                                CompletedTtl,
+                                cancellationToken);
 
-                return DeserializeResponse(
-                    completedResult);
+                        return DeserializeResponse(
+                            storeResult.ResponseContent);
+                    }
+
+                case IdempotencyStoreStatus.InFlight:
+                    {
+                        await _idempotencyGate.ReleaseAsync(
+                            key,
+                            leaseToken,
+                            CancellationToken.None);
+
+                        return request
+                            .CreateInProgressResponse();
+                    }
+
+                case IdempotencyStoreStatus.Acquired:
+                    break;
+
+                default:
+                    throw new InvalidOperationException(
+                        $"Unknown SQL idempotency status: {storeResult.Status}");
             }
 
-            // Hem Redis gate hem SQL ownership bu request'te.
-            // Artık gerçek workflow çalışabilir.
+            // Bundan sonrası gerçek business workflow.
             var response = await next();
 
-            // ÖNCE durable store.
+            // Success VE deterministic BusinessFailure
+            // burada normal TResponse olarak gelir.
+
+            // Önce SQL source of truth.
             await _idempotencyService.CompleteAsync(
-                idempotencyKey,
+                key,
                 response,
                 cancellationToken);
 
             var serializedResponse =
                 JsonSerializer.Serialize(response);
 
-            // SONRA Redis cache.
+            // Sonra Redis fast cache.
             await _idempotencyGate.MarkCompletedAsync(
-                idempotencyKey,
+                key,
                 leaseToken,
                 serializedResponse,
                 CompletedTtl,
@@ -139,14 +171,14 @@ public sealed class IdempotencyBehavior<TRequest, TResponse>
         }
         catch
         {
-            // Workflow başarısız olduysa Redis gate'i gereksiz
-            // şekilde TTL süresi boyunca tutmayalım.
+            // Unexpected technical failure.
             //
-            // CancellationToken.None kullanmamız bilinçli:
-            // HTTP request cancel edilmiş olsa bile best-effort
-            // olarak kendi lease'imizi bırakmak istiyoruz.
+            // SQL InFlight'i burada silmiyoruz.
+            // Provider'a istek gitmiş olabileceğinden
+            // duplicate charge riski yaratmak istemiyoruz.
+
             await _idempotencyGate.ReleaseAsync(
-                idempotencyKey,
+                key,
                 leaseToken,
                 CancellationToken.None);
 
@@ -154,29 +186,41 @@ public sealed class IdempotencyBehavior<TRequest, TResponse>
         }
     }
 
-    private async Task<TResponse> ExecuteWithSqlFallbackAsync(
-        string idempotencyKey,
-        RequestHandlerDelegate<TResponse> next,
-        CancellationToken cancellationToken)
+    private async Task<TResponse>
+        ExecuteWithSqlFallbackAsync(
+            IIdempotentRequest<TResponse> request,
+            string key,
+            RequestHandlerDelegate<TResponse> next,
+            CancellationToken cancellationToken)
     {
-        // Redis unavailable olduğunda mevcut SQL tabanlı
-        // correctness mekanizması devrede kalır.
-        var completedResult =
+        var storeResult =
             await _idempotencyService
-                .TryAcquireOrGetCompletedResultAsync(
-                    idempotencyKey,
+                .TryAcquireOrGetAsync(
+                    key,
                     cancellationToken);
 
-        if (completedResult is not null)
+        switch (storeResult.Status)
         {
-            return DeserializeResponse(
-                completedResult);
+            case IdempotencyStoreStatus.Completed:
+                return DeserializeResponse(
+                    storeResult.ResponseContent);
+
+            case IdempotencyStoreStatus.InFlight:
+                return request
+                    .CreateInProgressResponse();
+
+            case IdempotencyStoreStatus.Acquired:
+                break;
+
+            default:
+                throw new InvalidOperationException(
+                    $"Unknown SQL idempotency status: {storeResult.Status}");
         }
 
         var response = await next();
 
         await _idempotencyService.CompleteAsync(
-            idempotencyKey,
+            key,
             response,
             cancellationToken);
 
@@ -189,21 +233,10 @@ public sealed class IdempotencyBehavior<TRequest, TResponse>
         var properties = request
             .GetType()
             .GetProperties()
-            .Select(property =>
-                property.GetValue(request))
-            .Where(value =>
-                value is not null)
+            .Select(x => x.GetValue(request))
+            .Where(x => x is not null)
             .ToArray();
 
-        // ÖNEMLİ:
-        // Burada mevcut key formatımızı değiştirmiyoruz.
-        // "Request" kelimesini kaldırmıyoruz.
-        //
-        // PaymentExecutionRequest:
-        // paymentexecutionrequest:<hash>
-        //
-        // Böylece DB'deki mevcut idempotency kayıtlarıyla
-        // geriye dönük uyumluluk korunur.
         var prefix = request
             .GetType()
             .Name
@@ -226,8 +259,7 @@ public sealed class IdempotencyBehavior<TRequest, TResponse>
         }
 
         return JsonSerializer
-            .Deserialize<TResponse>(
-                responseContent)
+            .Deserialize<TResponse>(responseContent)
             ?? throw new InvalidOperationException(
                 "Stored idempotency response could not be deserialized.");
     }

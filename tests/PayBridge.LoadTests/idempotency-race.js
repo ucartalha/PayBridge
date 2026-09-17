@@ -1,25 +1,83 @@
 import http from 'k6/http';
 import { check } from 'k6';
-import { Counter } from 'k6/metrics';
+import { Counter, Trend } from 'k6/metrics';
+import exec from 'k6/execution';
 
 const serverErrors = new Counter('server_errors');
-const successResponses = new Counter('success_responses');
-const duplicateResponses = new Counter('duplicate_responses');
+const businessFailures = new Counter('business_failures');
+const conflictResponses = new Counter('conflict_responses');
+const unexpectedResponses = new Counter('unexpected_responses');
+
+const duration25 = new Trend('payment_duration_25_rps', true);
+const duration50 = new Trend('payment_duration_50_rps', true);
+const duration75 = new Trend('payment_duration_75_rps', true);
+const duration100 = new Trend('payment_duration_100_rps', true);
 
 export const options = {
     insecureSkipTLSVerify: true,
 
     scenarios: {
-        idempotency_race: {
-            executor: 'per-vu-iterations',
-            vus: 100,
-            iterations: 1,
-            maxDuration: '30s'
+        load_25_rps: {
+            executor: 'constant-arrival-rate',
+            rate: 25,
+            timeUnit: '1s',
+            duration: '60s',
+
+            preAllocatedVUs: 50,
+            maxVUs: 150,
+
+            startTime: '0s'
+        },
+
+        load_50_rps: {
+            executor: 'constant-arrival-rate',
+            rate: 50,
+            timeUnit: '1s',
+            duration: '60s',
+
+            preAllocatedVUs: 100,
+            maxVUs: 250,
+
+            startTime: '65s'
+        },
+
+        load_75_rps: {
+            executor: 'constant-arrival-rate',
+            rate: 75,
+            timeUnit: '1s',
+            duration: '60s',
+
+            preAllocatedVUs: 150,
+            maxVUs: 350,
+
+            startTime: '130s'
+        },
+
+        load_100_rps: {
+            executor: 'constant-arrival-rate',
+            rate: 100,
+            timeUnit: '1s',
+            duration: '60s',
+
+            preAllocatedVUs: 200,
+            maxVUs: 500,
+
+            startTime: '195s'
         }
     },
 
     thresholds: {
-        server_errors: ['count==0']
+        server_errors: [
+            'count==0'
+        ],
+
+        unexpected_responses: [
+            'count==0'
+        ],
+
+        conflict_responses: [
+            'count==0'
+        ]
     }
 };
 
@@ -42,12 +100,18 @@ export function setup() {
         }
     );
 
-    console.log(`Token status: ${tokenResponse.status}`);
-    console.log(`Token response: ${tokenResponse.body}`);
+    console.log(
+        `Token status: ${tokenResponse.status}`
+    );
 
-    if (tokenResponse.status < 200 || tokenResponse.status >= 300) {
+    if (
+        tokenResponse.status < 200 ||
+        tokenResponse.status >= 300
+    ) {
         throw new Error(
-            `Token alınamadı. Status: ${tokenResponse.status}`
+            `Token alınamadı. ` +
+            `Status=${tokenResponse.status} | ` +
+            `Body=${tokenResponse.body}`
         );
     }
 
@@ -61,16 +125,28 @@ export function setup() {
 
     if (!token) {
         throw new Error(
-            `Token response içinde token bulunamadı: ${tokenResponse.body}`
+            `Token response içinde token bulunamadı: ` +
+            tokenResponse.body
         );
     }
 
     return {
-        token: token
+        token,
+        orderPrefix: `LOAD-SUSTAINED-${Date.now()}`
     };
 }
 
 export default function (data) {
+
+    const scenarioName =
+        exec.scenario.name;
+
+    /*
+        Her iteration benzersiz OrderId üretir.
+        Böylece idempotency conflict beklemiyoruz.
+    */
+    const orderId =
+        `${data.orderPrefix}-${scenarioName}-${__VU}-${__ITER}-${Date.now()}`;
 
     const paymentPayload = JSON.stringify({
         integrationClientId:
@@ -83,7 +159,7 @@ export default function (data) {
             'MOCK-MERCHANT',
 
         orderId:
-            'LOAD-IDEMPOTENCY-RACE-011',
+            orderId,
 
         amount:
             10,
@@ -98,49 +174,127 @@ export default function (data) {
             'ECommerce'
     });
 
-    const paymentResponse = http.post(
+    const response = http.post(
         `${BASE_URL}/api/payments`,
         paymentPayload,
         {
             headers: {
                 'Content-Type': 'application/json',
                 'Authorization': `Bearer ${data.token}`
-            }
+            },
+
+            tags: {
+                test_type: 'sustained-payment-load',
+                load_stage: scenarioName
+            },
+
+            responseCallback:
+                http.expectedStatuses(200)
         }
     );
 
-    if (
-        paymentResponse.status >= 200 &&
-        paymentResponse.status < 300
-    ) {
-        successResponses.add(1);
+    /*
+        Her yük seviyesinin latency'sini
+        ayrı Trend metric'e yazıyoruz.
+    */
+    switch (scenarioName) {
+
+        case 'load_25_rps':
+            duration25.add(
+                response.timings.duration
+            );
+            break;
+
+        case 'load_50_rps':
+            duration50.add(
+                response.timings.duration
+            );
+            break;
+
+        case 'load_75_rps':
+            duration75.add(
+                response.timings.duration
+            );
+            break;
+
+        case 'load_100_rps':
+            duration100.add(
+                response.timings.duration
+            );
+            break;
     }
 
-    if (
-        paymentResponse.status === 400 ||
-        paymentResponse.status === 409
-    ) {
-        duplicateResponses.add(1);
+    switch (response.status) {
+
+        case 200:
+            break;
+
+        case 400:
+
+            businessFailures.add(1);
+
+            console.error(
+                `BUSINESS FAILURE | ` +
+                `Scenario=${scenarioName} | ` +
+                `VU=${__VU} | ` +
+                `OrderId=${orderId} | ` +
+                `Body=${response.body}`
+            );
+
+            break;
+
+        case 409:
+
+            conflictResponses.add(1);
+
+            console.error(
+                `UNEXPECTED CONFLICT | ` +
+                `Scenario=${scenarioName} | ` +
+                `VU=${__VU} | ` +
+                `OrderId=${orderId} | ` +
+                `Body=${response.body}`
+            );
+
+            break;
+
+        default:
+
+            if (response.status >= 500) {
+
+                serverErrors.add(1);
+
+                console.error(
+                    `SERVER ERROR | ` +
+                    `Scenario=${scenarioName} | ` +
+                    `VU=${__VU} | ` +
+                    `Status=${response.status} | ` +
+                    `OrderId=${orderId} | ` +
+                    `Body=${response.body}`
+                );
+            }
+            else {
+
+                unexpectedResponses.add(1);
+
+                console.error(
+                    `UNEXPECTED RESPONSE | ` +
+                    `Scenario=${scenarioName} | ` +
+                    `VU=${__VU} | ` +
+                    `Status=${response.status} | ` +
+                    `OrderId=${orderId} | ` +
+                    `Body=${response.body}`
+                );
+            }
+
+            break;
     }
 
-    if (paymentResponse.status >= 500) {
-        serverErrors.add(1);
+    check(response, {
 
-        console.error(
-            `SERVER ERROR | VU=${__VU} | ` +
-            `status=${paymentResponse.status} | ` +
-            `body=${paymentResponse.body}`
-        );
-    }
-
-    check(paymentResponse, {
         '500 hatasi yok':
             (r) => r.status < 500,
 
-        'request kontrollu handle edildi':
-            (r) =>
-                (r.status >= 200 && r.status < 300) ||
-                r.status === 400 ||
-                r.status === 409
+        'payment basarili':
+            (r) => r.status === 200
     });
 }

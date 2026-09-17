@@ -400,5 +400,11 @@
     "key": "merchants.provider_credential_not_active",
     "message": "Merchant provider credential is not active.",
     "userMessage": "Üye işyerine ait ödeme sağlayıcı erişim bilgisi aktif değildir."
+  },
+  {
+    "code": 90003,
+    "key": "idempotency.in_progress",
+    "message": "The same idempotent request is already being processed.",
+    "userMessage": "Aynı işlem şu anda işleniyor. Lütfen kısa süre sonra tekrar deneyin."
   }
 ]

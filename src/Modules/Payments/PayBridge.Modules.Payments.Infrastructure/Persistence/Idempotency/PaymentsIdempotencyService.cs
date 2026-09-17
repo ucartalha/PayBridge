@@ -24,11 +24,13 @@ internal sealed class PaymentsIdempotencyService : IIdempotencyService
         _dbContext = dbContext;
     }
 
-    public async Task<string?> TryAcquireOrGetCompletedResultAsync(
+    public async Task<IdempotencyStoreResult>
+    TryAcquireOrGetAsync(
         string key,
         CancellationToken cancellationToken)
     {
-        var candidate = IdempotencyRecord.CreateInFlight(key);
+        var candidate =
+            IdempotencyRecord.CreateInFlight(key);
 
         await _repository.AddAsync(
             candidate,
@@ -36,18 +38,17 @@ internal sealed class PaymentsIdempotencyService : IIdempotencyService
 
         try
         {
-            // İlk request key'in sahibi olmaya çalışıyor.
-            await _unitOfWork.SaveChangesAsync(cancellationToken);
+            await _unitOfWork.SaveChangesAsync(
+                cancellationToken);
 
-            // INSERT başarılıysa bu request owner.
-            return null;
+            return IdempotencyStoreResult.Acquired();
         }
         catch (DbUpdateException ex)
             when (ex.InnerException is SqlException sqlException &&
                   sqlException.Number is 2601 or 2627)
         {
-            // Başarısız INSERT entity'si ChangeTracker'da Added kalmasın.
-            _dbContext.Entry(candidate).State = EntityState.Detached;
+            _dbContext.Entry(candidate).State =
+                EntityState.Detached;
 
             var existingRecord =
                 await _dbContext.IdempotencyRecords
@@ -56,24 +57,20 @@ internal sealed class PaymentsIdempotencyService : IIdempotencyService
                         x => x.IdempotencyKey == key,
                         cancellationToken);
 
-            // PK hatası aldık ama kayıt artık yoksa bu normal
-            // duplicate senaryosu değildir.
             if (existingRecord is null)
             {
                 throw;
             }
 
-            // Önceki işlem tamamen bittiyse final response'u replay et.
             if (existingRecord.Status == "Completed" &&
-                !string.IsNullOrWhiteSpace(existingRecord.ResponseContent))
+                !string.IsNullOrWhiteSpace(
+                    existingRecord.ResponseContent))
             {
-                return existingRecord.ResponseContent;
+                return IdempotencyStoreResult.Completed(
+                    existingRecord.ResponseContent);
             }
-                
-            // Kayıt mevcut ama işlem halen devam ediyor.
-            throw new BusinessException(
-                (int)PaymentErrorCode.PaymentAlreadyInProgress,
-                ex);
+
+            return IdempotencyStoreResult.InFlight();
         }
     }
 
@@ -89,7 +86,8 @@ internal sealed class PaymentsIdempotencyService : IIdempotencyService
 
         if (record is null)
         {
-            return;
+            throw new InvalidOperationException(
+         $"Idempotency record was not found while completing key '{key}'.");
         }
 
         record.Complete(result);
