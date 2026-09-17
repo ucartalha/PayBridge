@@ -20,4 +20,9 @@
     <Using Include="Xunit" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\src\Modules\Payments\PayBridge.Modules.Payments.Application\PayBridge.Modules.Payments.Application.csproj" />
+    <ProjectReference Include="..\..\..\src\Modules\Providers\PayBridge.Modules.Providers.Infrastructure\PayBridge.Modules.Providers.Infrastructure.csproj" />
+  </ItemGroup>
+
 </Project>

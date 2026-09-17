@@ -102,7 +102,8 @@ public sealed class ProviderPaymentResultResolver : IProviderPaymentResultResolv
                     Amount: chargeRequest.Amount,
                     Currency: chargeRequest.Currency,
                     ProviderTransactionId: providerTransactionId,
-                    AttemptNumber: attemptNumber),
+                    AttemptNumber: attemptNumber,
+                    Credential: chargeRequest.Credential),
                 cancellationToken);
 
             lastInquiryResponse = inquiryResponse;
